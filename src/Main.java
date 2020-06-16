@@ -3,16 +3,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 
@@ -22,6 +20,8 @@ public class Main extends Application {
     ArrayList<String> options = new ArrayList<>();
     ArrayList<String> methods = new ArrayList<>();
     LineChart<Number,Number> lineChart;
+    ArrayList<Double> Histogram = new ArrayList<>();
+    DecimalFormat df = new DecimalFormat("#.###");
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -63,6 +63,7 @@ public class Main extends Application {
        ArrayList<TextField> textFields = s.getTextFields();
        ArrayList<Double> values = new ArrayList<>();
        ArrayList<ComboBox> comboBoxes = s.getComboBoxes();
+       ArrayList<Label> labels = s.getLabels();
        int function = options.indexOf(comboBoxes.get(0).getValue());
        int method = methods.indexOf(comboBoxes.get(1).getValue());
 
@@ -81,7 +82,19 @@ public class Main extends Application {
 
        }
 
-       plotAndCalculate(values, function, method);
+        for(int i = 0; i<values.get(3); i++)
+        {
+            plotAndCalculate(values, function, method);
+        }
+        double totalArea = 0;
+        for(double V : Histogram)
+        {
+            totalArea += V;
+        }
+        totalArea = totalArea / Histogram.size();
+
+        labels.get(0).setText(df.format(totalArea) + "FE");
+
 
     }
 
@@ -97,42 +110,82 @@ public class Main extends Application {
             case 0:
                 HOM = new MonteCarloHOM((int) Math.round(values.get(0)), function);
                 calculatedAreaHOM = HOM.calculateIntegral(values.get(1), values.get(2));
+                Histogram.add(calculatedAreaHOM);
 
             case 1:
                 MTC = new MonteCarloDirect((int) Math.round(values.get(0)), function);
-               calculatedAreaDirect= MTC.calculateIntegral(values.get(1), values.get(2));
+                calculatedAreaDirect= MTC.calculateIntegral(values.get(1), values.get(2));
+                Histogram.add(calculatedAreaDirect);
 
-            case 2:
-                HOM = new MonteCarloHOM((int) Math.round(values.get(0)), function);
-                MTC = new MonteCarloDirect((int) Math.round(values.get(0)), function);
-
-                calculatedAreaHOM = HOM.calculateIntegral(values.get(1), values.get(2));
-                calculatedAreaDirect = MTC.calculateIntegral(values.get(1), values.get(2));
         }
         ArrayList<ArrayList<Double>> nodesHOM = HOM.getMTCNodes();
+        ArrayList<ArrayList<Double>> nodesDirect = MTC.getMTCNodes();
+
         XYChart.Series functionData = new XYChart.Series();
         functionData.setName("f(x)");
-        XYChart.Series MTCNodesHOM = new XYChart.Series();
-        MTCNodesHOM.setName("Punkte HOM");
-        MTCNodesHOM.;
-        for (ArrayList<Double> n: nodesHOM){
-            MTCNodesHOM.getData().add(new XYChart.Data<>(n.get(0), n.get(1)));
-        }
 
-        for(double i = values.get(1); i <= values.get(2); i += 0.1){
+        XYChart.Series MTCNodesH = new XYChart.Series();
+        XYChart.Series MTCNodesM = new XYChart.Series();
+        MTCNodesH.setName("Punkte HOM Hit");
+        MTCNodesM.setName("Punkte HOM Miss");
+
+        XYChart.Series MTCNodesDirect = new XYChart.Series();
+        MTCNodesDirect.setName("Punkte Direkt");
+
+       lineChart.getData().clear();
+
+        if(method == 0) {
+            for (ArrayList<Double> n : nodesHOM) {
+                if (n.get(1) <= HOM.function(n.get(0))) {
+                    MTCNodesH.getData().add(new XYChart.Data<>(n.get(0), n.get(1)));
+                }
+                if(n.get(1) > HOM.function(n.get(0)))
+                {
+                    MTCNodesM.getData().add(new XYChart.Data<>(n.get(0), n.get(1)));
+                }
+            }
+
+
+            for (double i = values.get(1); i <= values.get(2); i += 0.1) {
                 double y = HOM.function(i);
                 functionData.getData().add(new XYChart.Data<>(i, y));
+            }
+
+            lineChart.getData().add(MTCNodesH);
+            MTCNodesH.getNode().setStyle("-fx-stroke: transparent");
+
+            lineChart.getData().add(MTCNodesM);
+            MTCNodesM.getNode().setStyle("-fx-stroke: transparent");
+
         }
 
-        lineChart.getData().clear();
+       if(method == 1) {
+           for (ArrayList<Double> n : nodesDirect) {
+               MTCNodesDirect.getData().add(new XYChart.Data<>(n.get(0), n.get(1)));
+           }
+
+           for (double i = values.get(1); i <= values.get(2); i += 0.1) {
+               double y = MTC.function(i);
+               functionData.getData().add(new XYChart.Data<>(i, y));
+           }
+
+           lineChart.getData().add(MTCNodesDirect);
+           MTCNodesDirect.getNode().setStyle("-fx-stroke: transparent");
+
+       }
+
+
+
         lineChart.getData().add(functionData);
-        lineChart.getData().add(MTCNodesHOM);
         functionData.getData().removeAll();
 
-
+        loadHistogram();
 
    }
 
+   private void loadHistogram(){
+        
+   }
    private void generateUI()
     {
         generateSettingsbox();
@@ -163,6 +216,9 @@ public class Main extends Application {
     }
 
     private void generateSettingsbox(){
+        s.addLabel("0 FE");
+        s.addPlaceholder(30);
+
         s.addLabel("Anzahl der Punkte: ");
         s.addPlaceholder(10);
         s.addTextField("10");
@@ -197,7 +253,6 @@ public class Main extends Application {
 
         methods.add("HOM");
         methods.add("Direkt");
-        methods.add("Beides");
         s.addComboBox(methods);
 
         s.addPlaceholder(20);
@@ -207,6 +262,9 @@ public class Main extends Application {
 
         s.addPlaceholder(20);
         s.addButton("Berechnen");
+
+        s.addPlaceholder(20);
+        s.addButton("E/n");
 
         layout.setLeft(s);
 

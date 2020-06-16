@@ -80,5 +80,6 @@ public class SettingsBox extends VBox
 
     public ArrayList<ComboBox> getComboBoxes(){return comboBoxes;}
 
+    public ArrayList<Label> getLabels(){return labels;}
 
 }
