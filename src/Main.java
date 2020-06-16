@@ -1,3 +1,4 @@
+import com.sun.javafx.scene.paint.GradientUtils;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -5,13 +6,16 @@ import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class Main extends Application {
@@ -20,8 +24,9 @@ public class Main extends Application {
     ArrayList<String> options = new ArrayList<>();
     ArrayList<String> methods = new ArrayList<>();
     LineChart<Number,Number> lineChart;
-    ArrayList<Double> Histogram = new ArrayList<>();
-    DecimalFormat df = new DecimalFormat("#.###");
+    ArrayList<Double> histogramValueArray = new ArrayList<>();
+    DecimalFormat df = new DecimalFormat("0.##");
+    BarChart<String,Number> histogramChart;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -87,19 +92,21 @@ public class Main extends Application {
             plotAndCalculate(values, function, method);
         }
         double totalArea = 0;
-        for(double V : Histogram)
+
+        for(double V : histogramValueArray)
         {
             totalArea += V;
         }
-        totalArea = totalArea / Histogram.size();
+        totalArea = totalArea / histogramValueArray.size();
 
-        labels.get(0).setText(df.format(totalArea) + "FE");
+        labels.get(0).setText(totalArea + "FE");
 
+       loadHistogram();
 
     }
 
+
    private void plotAndCalculate(ArrayList<Double> values, int function, int method){
-        System.out.println(function);
         MonteCarloHOM HOM = new MonteCarloHOM(0,0);
         MonteCarloDirect MTC = new MonteCarloDirect(0,0);
         double calculatedAreaDirect = 0;
@@ -110,12 +117,12 @@ public class Main extends Application {
             case 0:
                 HOM = new MonteCarloHOM((int) Math.round(values.get(0)), function);
                 calculatedAreaHOM = HOM.calculateIntegral(values.get(1), values.get(2));
-                Histogram.add(calculatedAreaHOM);
+                histogramValueArray.add(calculatedAreaHOM);
 
             case 1:
                 MTC = new MonteCarloDirect((int) Math.round(values.get(0)), function);
                 calculatedAreaDirect= MTC.calculateIntegral(values.get(1), values.get(2));
-                Histogram.add(calculatedAreaDirect);
+                histogramValueArray.add(calculatedAreaDirect);
 
         }
         ArrayList<ArrayList<Double>> nodesHOM = HOM.getMTCNodes();
@@ -179,11 +186,38 @@ public class Main extends Application {
         lineChart.getData().add(functionData);
         functionData.getData().removeAll();
 
-        loadHistogram();
+
 
    }
 
    private void loadHistogram(){
+       XYChart.Series hSeries = new XYChart.Series();
+       Set<String> histogramValueDuplicatList = new HashSet<>();
+       ArrayList<String> histgroamValueBuffer = new ArrayList<>();
+
+
+       for(double val: histogramValueArray){
+           histogramValueDuplicatList.add(df.format(val));
+           histgroamValueBuffer.add(df.format(val));
+       }
+
+       Collections.sort(histogramValueArray);
+       for(double val : histogramValueArray){
+            if(histogramValueDuplicatList.contains(df.format(val))) {
+               int occurrences = Collections.frequency(histgroamValueBuffer, df.format(val));
+               System.out.println(occurrences + ":" + df.format(val));
+               hSeries.setName("Werte");
+               hSeries.getData().add(new XYChart.Data(df.format(val), occurrences));
+               histogramValueDuplicatList.remove(df.format(val));
+           }
+
+        }
+        histogramChart.getData().clear();
+        histogramChart.getData().add(hSeries);
+
+        histogramValueArray.clear();
+
+
         
    }
    private void generateUI()
@@ -202,16 +236,17 @@ public class Main extends Application {
 
         NumberAxis xAxisError = new NumberAxis();
         NumberAxis yAxisError = new NumberAxis();
-        LineChart<Number,Number> errorChaort = new LineChart<>(xAxisError,yAxisError);
+        LineChart<Number,Number> errorChart = new LineChart<>(xAxisError,yAxisError);
 
         CategoryAxis  xAxisHistogram = new CategoryAxis ();
         NumberAxis yAxisHistogram = new NumberAxis();
-        BarChart<String,Number> histogram = new BarChart<>(xAxisHistogram,yAxisHistogram);
+        histogramChart = new BarChart<>(xAxisHistogram,yAxisHistogram);
 
-        VBox leftChartBox = new VBox();
-        leftChartBox.getChildren().addAll(errorChaort, histogram);
+        GridPane rightPane = new GridPane();
+        rightPane.add(errorChart, 0,0);
+        rightPane.add(histogramChart, 0, 1);
 
-        layout.setRight(leftChartBox);
+        layout.setRight(rightPane);
         layout.setCenter(lineChart);
     }
 
