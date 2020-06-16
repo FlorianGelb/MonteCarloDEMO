@@ -1,4 +1,3 @@
-import com.sun.javafx.scene.paint.GradientUtils;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -7,9 +6,7 @@ import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -25,7 +22,7 @@ public class Main extends Application {
     ArrayList<String> methods = new ArrayList<>();
     LineChart<Number,Number> lineChart;
     ArrayList<Double> histogramValueArray = new ArrayList<>();
-    DecimalFormat df = new DecimalFormat("0.##");
+    DecimalFormat df = new DecimalFormat("0.###");
     BarChart<String,Number> histogramChart;
 
     @Override
@@ -47,10 +44,12 @@ public class Main extends Application {
 
    private void setUpBackEnd(){
         ArrayList<Button> buttons = s.getButtons();
+       Button buttonErrorCalculate = new Button();
 
         Button startButton = new Button();
             for(Button B : buttons){
                 if(B.getText().equals("Berechnen")){startButton = B;}
+                if(B.getText().equals("E/n")){buttonErrorCalculate = B;}
             }
 
 
@@ -60,6 +59,36 @@ public class Main extends Application {
                }
            });
 
+            buttonErrorCalculate.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent actionEvent) {
+                    plotErrorN();
+                }
+            });
+
+
+
+   }
+
+   private void plotErrorN()
+   {
+       int function = options.indexOf(s.getComboBoxes().get(0).getValue());
+       int method = methods.indexOf(s.getComboBoxes().get(1).getValue());
+       int x0 = Integer.parseInt(s.getTextFields().get(0).getText());
+       int x = Integer.parseInt(s.getTextFields().get(1).getText());
+
+       MonteCarloHOM errorHOM = new MonteCarloHOM(0, function);
+       MonteCarloDirect errorDirect = new MonteCarloDirect(0, function);
+
+
+       for(int i = 0; i < 200; i += 10)
+       {
+           if (method == 0) {
+               errorHOM.setN(i);
+               errorHOM.calculateError(x0, x);
+           }
+
+       }
 
    }
 
@@ -113,18 +142,20 @@ public class Main extends Application {
         double calculatedAreaHOM =  0;
 
 
-        switch(method) {
-            case 0:
+
+            if(method == 0) {
                 HOM = new MonteCarloHOM((int) Math.round(values.get(0)), function);
                 calculatedAreaHOM = HOM.calculateIntegral(values.get(1), values.get(2));
                 histogramValueArray.add(calculatedAreaHOM);
+            }
 
-            case 1:
+            if(method == 1) {
                 MTC = new MonteCarloDirect((int) Math.round(values.get(0)), function);
-                calculatedAreaDirect= MTC.calculateIntegral(values.get(1), values.get(2));
+                calculatedAreaDirect = MTC.calculateIntegral(values.get(1), values.get(2));
                 histogramValueArray.add(calculatedAreaDirect);
+            }
 
-        }
+
         ArrayList<ArrayList<Double>> nodesHOM = HOM.getMTCNodes();
         ArrayList<ArrayList<Double>> nodesDirect = MTC.getMTCNodes();
 
@@ -193,38 +224,34 @@ public class Main extends Application {
    private void loadHistogram(){
        XYChart.Series hSeries = new XYChart.Series();
        Set<String> histogramValueDuplicatList = new HashSet<>();
-       ArrayList<String> histgroamValueBuffer = new ArrayList<>();
+       ArrayList<String> histogramValueBuffer = new ArrayList<>();
 
 
        for(double val: histogramValueArray){
            histogramValueDuplicatList.add(df.format(val));
-           histgroamValueBuffer.add(df.format(val));
+           histogramValueBuffer.add(df.format(val));
        }
 
        Collections.sort(histogramValueArray);
        for(double val : histogramValueArray){
             if(histogramValueDuplicatList.contains(df.format(val))) {
-               int occurrences = Collections.frequency(histgroamValueBuffer, df.format(val));
+               int occurrences = Collections.frequency(histogramValueBuffer, df.format(val));
                System.out.println(occurrences + ":" + df.format(val));
-               hSeries.setName("Werte");
+               hSeries.setName("Häufigkeit der Werte");
                hSeries.getData().add(new XYChart.Data(df.format(val), occurrences));
                histogramValueDuplicatList.remove(df.format(val));
            }
 
         }
+
         histogramChart.getData().clear();
         histogramChart.getData().add(hSeries);
-
         histogramValueArray.clear();
-
-
-        
    }
    private void generateUI()
     {
         generateSettingsbox();
         generateCharts();
-
     }
 
     private void generateCharts(){
@@ -240,6 +267,7 @@ public class Main extends Application {
 
         CategoryAxis  xAxisHistogram = new CategoryAxis ();
         NumberAxis yAxisHistogram = new NumberAxis();
+        xAxisHistogram.setAnimated(false);
         histogramChart = new BarChart<>(xAxisHistogram,yAxisHistogram);
 
         GridPane rightPane = new GridPane();

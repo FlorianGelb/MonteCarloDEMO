@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Random;
 
 public class MonteCarloHOM extends MonteCarlo
 {
@@ -20,8 +19,9 @@ public class MonteCarloHOM extends MonteCarlo
         for(int i = 0; i < n; i++)
         {
             ArrayList<Double> insertionArray = new ArrayList<>();
-
+            boolean negative = randomGenerator.nextBoolean();
             double xVal = x0 + (x - x0) * randomGenerator.nextDouble();
+            if(negative && -xVal >= x0){xVal *= -1;}
             double yVal = maxValue * randomGenerator.nextDouble();
 
             if (yVal <= function(xVal)){hitCounter++;}
@@ -39,7 +39,7 @@ public class MonteCarloHOM extends MonteCarlo
             return 1;
         }
 
-        return x;
+        return function(x);
     }
 
 
