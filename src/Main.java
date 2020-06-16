@@ -24,6 +24,7 @@ public class Main extends Application {
     ArrayList<Double> histogramValueArray = new ArrayList<>();
     DecimalFormat df = new DecimalFormat("0.###");
     BarChart<String,Number> histogramChart;
+    LineChart<Number,Number> errorChart;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -74,21 +75,42 @@ public class Main extends Application {
    {
        int function = options.indexOf(s.getComboBoxes().get(0).getValue());
        int method = methods.indexOf(s.getComboBoxes().get(1).getValue());
-       int x0 = Integer.parseInt(s.getTextFields().get(0).getText());
-       int x = Integer.parseInt(s.getTextFields().get(1).getText());
-
-       MonteCarloHOM errorHOM = new MonteCarloHOM(0, function);
-       MonteCarloDirect errorDirect = new MonteCarloDirect(0, function);
+       int x0 = Integer.parseInt(s.getTextFields().get(1).getText());
+       int x = Integer.parseInt(s.getTextFields().get(2).getText());
 
 
-       for(int i = 0; i < 200; i += 10)
+       XYChart.Series errorSeries = new XYChart.Series();
+       errorSeries.setName("Relativer Fehler - Anzahl Punkte");
+
+       for(int i = 2; i <= 2000; i += 1)
        {
+
+           MonteCarloHOM errorHOM = new MonteCarloHOM(i, function);
+           MonteCarloDirect errorDirect = new MonteCarloDirect(i, function);
+
            if (method == 0) {
-               errorHOM.setN(i);
-               errorHOM.calculateError(x0, x);
+               double area = errorHOM.calculateIntegral(x0, x);
+               double exactArea = errorHOM.calculateExactIntegral(x0, x);
+               double e = (exactArea - area) / exactArea;
+               errorSeries.getData().add(new XYChart.Data<>(i, e));
+
+           }
+
+           if (method == 1) {
+               double area = errorDirect.calculateIntegral(x0, x);
+               double exactArea = errorDirect.calculateExactIntegral(x0, x);
+               double e = (exactArea - area) / exactArea;
+               errorSeries.getData().add(new XYChart.Data<>(i, e));
+
            }
 
        }
+       errorChart.getData().clear();
+       errorChart.getData().add(errorSeries);
+
+
+
+
 
    }
 
@@ -236,7 +258,6 @@ public class Main extends Application {
        for(double val : histogramValueArray){
             if(histogramValueDuplicatList.contains(df.format(val))) {
                int occurrences = Collections.frequency(histogramValueBuffer, df.format(val));
-               System.out.println(occurrences + ":" + df.format(val));
                hSeries.setName("Häufigkeit der Werte");
                hSeries.getData().add(new XYChart.Data(df.format(val), occurrences));
                histogramValueDuplicatList.remove(df.format(val));
@@ -263,7 +284,7 @@ public class Main extends Application {
 
         NumberAxis xAxisError = new NumberAxis();
         NumberAxis yAxisError = new NumberAxis();
-        LineChart<Number,Number> errorChart = new LineChart<>(xAxisError,yAxisError);
+       errorChart = new LineChart<>(xAxisError,yAxisError);
 
         CategoryAxis  xAxisHistogram = new CategoryAxis ();
         NumberAxis yAxisHistogram = new NumberAxis();

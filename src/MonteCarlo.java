@@ -16,6 +16,29 @@ public class MonteCarlo
         this.functionType = functionType;
     }
 
+    protected double indefinitIntegralFunction(double x)
+    {
+        switch (functionType){
+            case 0:
+                return 0.5 * Math.pow(x, 2);
+            case 1:
+                return (1/3) * Math.pow(x, 3);
+            case 2:
+                return (1/4) * Math.pow(x, 4);
+            case 3:
+                return Math.cos(x);
+            case 4:
+                return -Math.sin(x);
+            case 5:
+                return Math.log(Math.pow(Math.E, -x) + 1);
+            case 6:
+                return Math.pow(Math.E, x);
+
+        }
+        return 0;
+
+    }
+
     protected double function(double x)
     {
         switch (functionType){
@@ -36,6 +59,11 @@ public class MonteCarlo
 
         }
         return 0;
+    }
+
+    protected double calculateExactIntegral(int x0, int x)
+    {
+        return Math.abs(indefinitIntegralFunction(x) - indefinitIntegralFunction(x0));
     }
 
     public int getN(){return n;}

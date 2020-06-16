@@ -1,5 +1,5 @@
 import java.util.ArrayList;
-import java.util.Random;
+
 
 public class MonteCarloDirect extends MonteCarlo
 {
@@ -29,6 +29,14 @@ public class MonteCarloDirect extends MonteCarlo
 
     }
 
+    public double calculateError(int x0, int x)
+    {
+        double exactIntegral = calculateExactIntegral(x0, x);
+        area = calculateIntegral(x0, x);
+        double relativeError = (area - exactIntegral) / exactIntegral;
+        return relativeError;
+
+    }
 
     public double calculateIntegral(double x0, double x){
         double averageFunctionValue = 0;
