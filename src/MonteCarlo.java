@@ -88,7 +88,7 @@ public class MonteCarlo
         return 0;
     }
 
-    protected double calculateExactIntegral(int x0, int x)
+    protected double calculateExactIntegral(double x0, double x)
     {
         return Math.abs(indefinitIntegralFunction(x) - indefinitIntegralFunction(x0));
     }

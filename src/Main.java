@@ -8,6 +8,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,8 +76,8 @@ public class Main extends Application {
    {
        int function = options.indexOf(s.getComboBoxes().get(0).getValue());
        int method = methods.indexOf(s.getComboBoxes().get(1).getValue());
-       int x0 = Integer.parseInt(s.getTextFields().get(1).getText());
-       int x = Integer.parseInt(s.getTextFields().get(2).getText());
+       double x0 = Double.parseDouble(s.getTextFields().get(1).getText());
+       double x = Double.parseDouble(s.getTextFields().get(2).getText());
 
 
        XYChart.Series errorSeries = new XYChart.Series();
@@ -90,7 +91,20 @@ public class Main extends Application {
 
            if (method == 0) {
                double area = errorHOM.calculateIntegral(x0, x);
-               double exactArea = errorHOM.calculateExactIntegral(x0, x);
+               double exactArea = 0;
+               double a = x0;
+               double b = x;
+
+               ArrayList<Double> zerroPoints = errorHOM.zeroPoints(x0, x);
+               ArrayList<Double> integrationIntervall = new ArrayList<>();
+               integrationIntervall.add(x0);
+               integrationIntervall.addAll(zerroPoints);
+               integrationIntervall.add(x);
+               for(double xValZero : integrationIntervall){
+                   exactArea += errorHOM.calculateExactIntegral(a, xValZero);
+                   a = xValZero;
+               }
+
                double e = (exactArea - area) / exactArea;
                errorSeries.getData().add(new XYChart.Data<>(i, e));
 
@@ -202,8 +216,10 @@ public class Main extends Application {
                 double xPoint = n.get(0);
                 double yPoint = n.get(1);
                 double functionY = HOM.function(xPoint);
+                double x0 = values.get(1);
+                double x = values.get(2);
 
-                if (((yPoint <= functionY && functionY > 0 && yPoint > 0) || (yPoint >= functionY && yPoint < 0 && functionY < 0)) && (xPoint <= x &&) {
+                if (((yPoint <= functionY && functionY > 0 && yPoint > 0) || (yPoint >= functionY && yPoint < 0 && functionY < 0)) && (xPoint <= x && xPoint >= x0)) {
                     MTCNodesH.getData().add(new XYChart.Data<>(n.get(0), n.get(1)));
                 }
                 else

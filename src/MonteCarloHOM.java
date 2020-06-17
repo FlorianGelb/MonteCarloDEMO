@@ -19,24 +19,16 @@ public class MonteCarloHOM extends MonteCarlo
         for(int i = 0; i < n; i++)
         {
             ArrayList<Double> insertionArray = new ArrayList<>();
-            boolean negativeY = randomGenerator.nextBoolean();
-            boolean negativeX = randomGenerator.nextBoolean();
 
-            double xVal = x0 + (x - x0) * randomGenerator.nextDouble();
-            double yVal = maxValue * randomGenerator.nextDouble();
+            double xVal = x0 + ((x - x0) * randomGenerator.nextDouble());
+            double yVal = minValue +(maxValue - minValue) * randomGenerator.nextDouble();
 
-            if(negativeY && minValue < 0){yVal *= -1;}
-            if(negativeX && function(xVal) < 0){xVal *=-1;}
-
-            if ((yVal <= function(xVal) && function(xVal) > 0 && yVal > 0) || (yVal >= function(xVal)  && function(xVal) < 0 && yVal < 0))
+            if ((yVal <= function(xVal) && function(xVal) > 0 && yVal > 0) || (yVal >= function(xVal)  && function(xVal) < 0 && yVal < 0) && (xVal <= x && x >= x0))
             {hitCounter++;}
 
             insertionArray.add(xVal);
             insertionArray.add(yVal);
             MTCNodes.add(insertionArray);
-
-
-
 
         }
 
@@ -46,6 +38,7 @@ public class MonteCarloHOM extends MonteCarlo
         if(functionType == 3 || functionType == 4){
             return -1;
         }
+        if(functionType == 1){return 0;}
         return function(x0);
 
     }
@@ -54,9 +47,28 @@ public class MonteCarloHOM extends MonteCarlo
         if(functionType == 3 || functionType == 4){
             return 1;
         }
-        double borderX0 = Math.abs(function(x0));
-        double borderX = Math.abs(function(x));
-        if (borderX > borderX0){return function(x);}
+
+        if(functionType == 1){
+            double intervalBoarder1 = function(x0);
+            double intervalBorder2 = function(1);
+
+            if(intervalBoarder1 > intervalBorder2)
+            {
+                return intervalBoarder1;
+            }
+            return intervalBorder2;
+
+        }
+
+        if (x > x0)
+        {
+            if(function(x) < 0)
+            {
+                return Math.abs(function(x));
+            }
+            return function(x);}
+        if(function(x) < 0){
+        return Math.abs(function(x0));}
         return function(x0);
     }
 
@@ -65,11 +77,14 @@ public class MonteCarloHOM extends MonteCarlo
         ArrayList<Double> zeroPoints = zeroPoints(x0,x);
         System.out.println(zeroPoints);
         generateMTCNodes(x0, x);
-        int negativeFactor = 1;
-        if (findMinValue(x0, x) < 0){negativeFactor = 0;}
+        double minValue = findMinValue(x0, x);
+        if(minValue < 0)
+        {
+            minValue *= -1;
+        }
 
         double K = (double)hitCounter / (double)n;
-        double AREA = negativeFactor * maxValue * (x - x0);
+        double AREA = (minValue +  maxValue) * (x - x0);
         area = AREA * K;
         return area;
     }

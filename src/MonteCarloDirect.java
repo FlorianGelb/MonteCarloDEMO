@@ -17,10 +17,12 @@ public class MonteCarloDirect extends MonteCarlo
     protected void generateMTCNodes(double x0, double x){
         for(int i = 0; i < n; i++)
         {
-            boolean negative = randomGenerator.nextBoolean();
+            //boolean negative = randomGenerator.nextBoolean();
             ArrayList<Double> insertionArray = new ArrayList<>();
             double xVal = x0 + (x - x0) * randomGenerator.nextDouble();
-            if(negative && -xVal >= x0){xVal *= -1;}
+
+            //if(negative && -xVal >= x0){xVal *= -1;}
+
             double yVal = function(xVal);
             insertionArray.add(xVal);
             insertionArray.add(yVal);
@@ -29,14 +31,6 @@ public class MonteCarloDirect extends MonteCarlo
 
     }
 
-    public double calculateError(int x0, int x)
-    {
-        double exactIntegral = calculateExactIntegral(x0, x);
-        area = calculateIntegral(x0, x);
-        double relativeError = (area - exactIntegral) / exactIntegral;
-        return relativeError;
-
-    }
 
     public double calculateIntegral(double x0, double x){
         double averageFunctionValue = 0;
