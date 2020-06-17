@@ -19,8 +19,8 @@ public class MonteCarlo
     protected ArrayList<Double> zeroPoints(double x0, double x)
     {
         ArrayList<Double> returnArrayList = new ArrayList<>();
-        if (functionType == 0 || functionType == 1 || functionType == 2 || functionType == 3){returnArrayList.add(0.0);}
-        if (functionType == 4 || functionType == 5){
+        if (functionType == 0 || functionType == 1 || functionType == 2){returnArrayList.add(0.0);}
+        else if (functionType == 3 || functionType == 4){
             double phaseShiftFactor = 1;
             if(functionType == 5){ phaseShiftFactor = 0.5;}
 

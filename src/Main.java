@@ -199,11 +199,16 @@ public class Main extends Application {
 
         if(method == 0) {
             for (ArrayList<Double> n : nodesHOM) {
-                if ((n.get(1) <= HOM.function(n.get(0)) && HOM.function(n.get(0)) > 0) || (n.get(1) > HOM.function(n.get(0)) && n.get(1) < 0 && HOM.function(n.get(0)) < 0)) {
+                double xPoint = n.get(0);
+                double yPoint = n.get(1);
+                double functionY = HOM.function(xPoint);
+
+                if (((yPoint <= functionY && functionY > 0 && yPoint > 0) || (yPoint >= functionY && yPoint < 0 && functionY < 0)) && (xPoint <= x &&) {
                     MTCNodesH.getData().add(new XYChart.Data<>(n.get(0), n.get(1)));
                 }
-                if((n.get(1) > HOM.function(n.get(0)) && HOM.function(n.get(0)) > 0) || ((n.get(1) < HOM.function(n.get(0)) && HOM.function(n.get(0)) < 0)))
+                else
                 {
+
                     MTCNodesM.getData().add(new XYChart.Data<>(n.get(0), n.get(1)));
                 }
             }
