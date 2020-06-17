@@ -184,7 +184,7 @@ public class Main extends Application {
    }
 
    private void loadHistogram(){
-        
+
    }
    private void generateUI()
     {
