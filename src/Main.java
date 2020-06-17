@@ -102,11 +102,14 @@ public class Main extends Application {
                double e = (exactArea - area) / exactArea;
                errorSeries.getData().add(new XYChart.Data<>(i, e));
 
+
            }
 
        }
+
        errorChart.getData().clear();
        errorChart.getData().add(errorSeries);
+       errorSeries.getNode().setStyle("-fx-stroke: transparent");
 
 
 
@@ -196,10 +199,10 @@ public class Main extends Application {
 
         if(method == 0) {
             for (ArrayList<Double> n : nodesHOM) {
-                if (n.get(1) <= HOM.function(n.get(0))) {
+                if ((n.get(1) <= HOM.function(n.get(0)) && HOM.function(n.get(0)) > 0) || (n.get(1) > HOM.function(n.get(0)) && n.get(1) < 0 && HOM.function(n.get(0)) < 0)) {
                     MTCNodesH.getData().add(new XYChart.Data<>(n.get(0), n.get(1)));
                 }
-                if(n.get(1) > HOM.function(n.get(0)))
+                if((n.get(1) > HOM.function(n.get(0)) && HOM.function(n.get(0)) > 0) || ((n.get(1) < HOM.function(n.get(0)) && HOM.function(n.get(0)) < 0)))
                 {
                     MTCNodesM.getData().add(new XYChart.Data<>(n.get(0), n.get(1)));
                 }

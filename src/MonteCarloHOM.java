@@ -15,20 +15,26 @@ public class MonteCarloHOM extends MonteCarlo
 
     protected void generateMTCNodes(double x0, double x){
         maxValue = findAbsoluteMaxValue(x0, x);
-        minValue = findMinValue(x0, x);
+        double minValue = findMinValue(x0, x);
+        ArrayList<Double> zeroPoints = zeroPoints(x0,x);
         for(int i = 0; i < n; i++)
         {
             ArrayList<Double> insertionArray = new ArrayList<>();
             boolean negative = randomGenerator.nextBoolean();
             double xVal = x0 + (x - x0) * randomGenerator.nextDouble();
             double yVal = maxValue * randomGenerator.nextDouble();
-            if(negative){yVal *= -1;}
+            if(negative && minValue < 0){yVal *= -1;}
+            if ((yVal <= function(xVal) && function(xVal) > 0) || (yVal >= function(xVal)  && function(xVal) < 0))
+            {hitCounter++;
+            }
 
-            if (yVal <= function(xVal)){hitCounter++;}
+            if(yVal > 0 && function(xVal) > 0 || yVal < 0 && function(xVal) < 0 && yVal > function(xVal)) {
+                insertionArray.add(xVal);
+                insertionArray.add(yVal);
+                MTCNodes.add(insertionArray);
+            }
 
-            insertionArray.add(xVal);
-            insertionArray.add(yVal);
-            MTCNodes.add(insertionArray);
+
 
         }
 

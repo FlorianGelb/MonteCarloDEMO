@@ -16,6 +16,33 @@ public class MonteCarlo
         this.functionType = functionType;
     }
 
+    protected ArrayList<Double> zeroPoints(double x0, double x)
+    {
+        ArrayList<Double> returnArrayList = new ArrayList<>();
+        if (functionType == 0 || functionType == 1 || functionType == 2 || functionType == 3){returnArrayList.add(0.0);}
+        if (functionType == 4 || functionType == 5){
+            double phaseShiftFactor = 1;
+            if(functionType == 5){ phaseShiftFactor = 0.5;}
+
+            int negativeZeroPointFactors = (int)(x0 / (phaseShiftFactor * Math.PI));
+            int positiveZeroPontFactors = (int)(x / (phaseShiftFactor * Math.PI));
+
+            for (int i = 0; i >= negativeZeroPointFactors; i--)
+            {
+                returnArrayList.add(i * (phaseShiftFactor * Math.PI));
+            }
+
+            for(int i = 0; i <= positiveZeroPontFactors; i++){
+                returnArrayList.add(i * (phaseShiftFactor * Math.PI));
+            }
+
+
+        }
+
+        else{returnArrayList.add(Double.MAX_VALUE);}
+        return returnArrayList;
+    }
+
     protected double indefinitIntegralFunction(double x)
     {
         switch (functionType){
