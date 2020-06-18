@@ -100,12 +100,21 @@ public class Main extends Application {
                integrationIntervall.add(x0);
                integrationIntervall.addAll(zerroPoints);
                integrationIntervall.add(x);
-               for(double xValZero : integrationIntervall){
-                   exactArea += errorHOM.calculateExactIntegral(a, xValZero);
-                   a = xValZero;
-               }
 
-               double e = (exactArea - area) / exactArea;
+               for(double xValZero : integrationIntervall){
+                   if(errorHOM.function((a + xValZero)/2) > 0) {
+                       exactArea += errorHOM.calculateExactIntegral(a, xValZero);
+                   }
+                   else{exactArea -= errorHOM.calculateExactIntegral(a, xValZero);}
+                   a = xValZero;
+
+               }
+               double e = 0;
+               if (exactArea == 0)
+               {
+                   e = exactArea -area;
+               }
+               else{e = (exactArea - area) / exactArea;}
                errorSeries.getData().add(new XYChart.Data<>(i, e));
 
            }
@@ -113,7 +122,12 @@ public class Main extends Application {
            if (method == 1) {
                double area = errorDirect.calculateIntegral(x0, x);
                double exactArea = errorDirect.calculateExactIntegral(x0, x);
-               double e = (exactArea - area) / exactArea;
+               double e = 0;
+               if (exactArea == 0)
+               {
+                   e = exactArea -area;
+               }
+               else{e = (exactArea - area) / exactArea;}
                errorSeries.getData().add(new XYChart.Data<>(i, e));
 
 

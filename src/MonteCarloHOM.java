@@ -75,7 +75,6 @@ public class MonteCarloHOM extends MonteCarlo
 
     public double calculateIntegral(double x0, double x){
         ArrayList<Double> zeroPoints = zeroPoints(x0,x);
-        System.out.println(zeroPoints);
         generateMTCNodes(x0, x);
         double minValue = findMinValue(x0, x);
         if(minValue < 0)
