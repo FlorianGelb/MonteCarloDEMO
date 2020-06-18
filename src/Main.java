@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 
 public class Main extends Application {
@@ -129,10 +130,7 @@ public class Main extends Application {
                }
                else{e = (exactArea - area) / exactArea;}
                errorSeries.getData().add(new XYChart.Data<>(i, e));
-
-
            }
-
        }
 
        errorChart.getData().clear();
@@ -157,6 +155,13 @@ public class Main extends Application {
 
        for (TextField t : textFields) {
            try {
+               if (Double.parseDouble(textFields.get(1).getText()) > Double.parseDouble(textFields.get(2).getText()))
+               {
+                   textFields.get(1).setText("0");
+                   values.add(0.0);
+                   throw new Exception();
+               }
+
                values.add(Double.parseDouble(t.getText()));
            }
            catch (Exception e){
