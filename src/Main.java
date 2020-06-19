@@ -301,8 +301,8 @@ public class Main extends Application {
        for(double val : histogramValueArray){
             if(histogramValueDuplicatList.contains(df.format(val))) {
                int occurrences = Collections.frequency(histogramValueBuffer, df.format(val));
-               hSeries.setName("Häufigkeit der Werte");
-               hSeries.getData().add(new XYChart.Data(df.format(val), occurrences));
+               hSeries.setName("Werteverteilung");
+               hSeries.getData().add(new XYChart.Data(df.format(val), (double)occurrences / (double)histogramValueArray.size()));
                histogramValueDuplicatList.remove(df.format(val));
            }
 
